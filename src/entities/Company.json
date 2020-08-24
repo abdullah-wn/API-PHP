@@ -1,0 +1,18 @@
+{
+    "table": "Company",
+    "columns": {
+        "id": "id",
+        "address": "address",
+        "postalCode": "postal_code",
+        "town": "town",
+        "name": "name",
+        "phone": "phone_number",
+        "category": {
+            "entity": "Option",
+            "reference": {
+                "from": "category",
+                "to": "id"
+            }
+        }
+    }
+}

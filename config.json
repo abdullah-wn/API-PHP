@@ -1,0 +1,25 @@
+{
+    "parameters": {
+        "path_entity": "/home/ngbamaw/PhpstormProjects/API/src/entities",
+        "path_model": "/home/ngbamaw/PhpstormProjects/API/src/models"
+    },
+    "default": {
+        "id": "id",
+        "softDelete": {
+            "columnName": "deleted",
+            "on": false
+        },
+        "columns": {
+            "property": {
+                "required": false,
+                "list": false,
+                "full": false,
+                "name": null,
+                "entity": null,
+                "entities": null,
+                "reference": null,
+                "validation": []
+            }
+        }
+    }
+}

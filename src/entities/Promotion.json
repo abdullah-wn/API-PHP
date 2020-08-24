@@ -1,0 +1,10 @@
+{
+    "table": "Promotion",
+    "columns": {
+        "id": {
+            "name": "id",
+            "validation": ["isNumber"]
+        },
+        "year": "year"
+    }
+}

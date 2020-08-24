@@ -1,0 +1,8 @@
+{
+    "user": "AdminGS",
+    "password": "gs_pwd",
+    "host": "localhost",
+    "port": 3306,
+    "db": "GestionStage"
+}
+

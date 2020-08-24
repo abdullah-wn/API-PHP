@@ -1,0 +1,21 @@
+{
+    "name": "aeberdinelli/express-php",
+    "description": "A clone of the ExpressJS Framework for PHP",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Alan Berdinelli",
+            "email": "aeberdinelli@gmail.com"
+        }
+    ],
+	"autoload": {
+		"psr-4": {
+			"Express\\": ["src/Express/"],
+			"Jade\\": ["src/Jade/"]
+		}
+	},
+    "require": {
+        "mustache/mustache": "^2.12",
+        "oyejorge/less.php": "~1.7.0.9"
+	}
+}

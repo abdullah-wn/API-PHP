@@ -1,0 +1,25 @@
+{
+    "table": "Option",
+    "columns": {
+        "id": "id",
+        "wording": {
+            "name": "wording",
+            "required": true,
+            "validation": [
+                {
+                    "check": "matches",
+                    "value": "(SLAM|SISR)",
+                    "message": "This field must be SLAM or SISR"
+                }
+            ]
+        },
+        "company": {
+            "list": true,
+            "entities": ["Company"],
+            "reference": {
+                "from": "id",
+                "to": "category"
+            }
+        }
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "table": "Student",
+    "columns": {
+        "id": {
+            "name": "id",
+            "validation": ["isNumber"]
+        },
+        "lastname": "lastname",
+        "firstname": "firstname",
+        "mail": "mail",
+        "address": "address",
+        "town": "town",
+        "postalCode": "postal_code",
+        "promotion": {
+            "entity": "Promotion",
+            "reference": {
+                "from": "id_Promotion",
+                "to": "id"
+            }
+        },
+        "option": {
+            "entity": "Option",
+            "reference": {
+                "from": "id_Option",
+                "to": "id"
+            }
+        },
+        "inscription": "inscription"
+    }
+}
