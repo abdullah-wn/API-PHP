@@ -63,11 +63,11 @@ class DAO implements DAOInterface
      * @param callable[] $actionsOnResult
      */
     public function getById(
-        $entities,
-        $entity,
+        array $entities,
+        Entity $entity,
         $id,
-        $actionsOnQuery = null,
-        $actionsOnResult = null
+        array $actionsOnQuery = null,
+        array $actionsOnResult = null
     ) {
         $object = [];
         $columns = $entity->columns;
@@ -160,11 +160,11 @@ class DAO implements DAOInterface
      * @param callable[] $actionsOnResult
      */
     public function getByFields(
-        $entities,
-        $entity,
-        $fields,
-        $actionsOnQuery = null,
-        $actionsOnResult = null
+        array $entities,
+        Entity $entity,
+        array $fields,
+        array $actionsOnQuery = null,
+        array $actionsOnResult = null
     ) {
         $objects = [];
         $columns = $entity->columns;
@@ -284,11 +284,11 @@ class DAO implements DAOInterface
      * @param callable[]    $actionsOnResult
      */
     public function update(
-        $entities,
-        $entity,
+        array $entities,
+        Entity $entity,
         $object,
-        $actionsOnQuery = null,
-        $actionsOnResult = null
+        array $actionsOnQuery = null,
+        array $actionsOnResult = null
     ) {
         $columns = $entity->columns;
         $columnsNotRef = [];
@@ -496,11 +496,11 @@ class DAO implements DAOInterface
      * @param callable[] $actionsOnResult
      */
     public function create(
-        $entities,
-        $entity,
+        array $entities,
+        Entity $entity,
         $object,
-        $actionsOnQuery = null,
-        $actionsOnResult = null
+        array $actionsOnQuery = null,
+        array $actionsOnResult = null
     ) {
         $columns = $entity->columns;
         $columnNames = [];
@@ -660,11 +660,11 @@ class DAO implements DAOInterface
      * @param callable[] $actionsOnResult
      */
     public function delete(
-        $entities,
-        $entity,
+        array $entities,
+        Entity $entity,
         $id,
-        $actionsOnQuery = null,
-        $actionsOnResult = null
+        array $actionsOnQuery = null,
+        array $actionsOnResult = null
     ) {
         $client = $this->client;
         $queryValues = [
@@ -714,11 +714,11 @@ class DAO implements DAOInterface
      * @param callable[] $actionsOnResult
      */
     public function deleteByFields(
-        $entities,
-        $entity,
-        $fields,
-        $actionsOnQuery = null,
-        $actionsOnResult = null
+        array $entities,
+        Entity $entity,
+        array $fields,
+        array $actionsOnQuery = null,
+        array $actionsOnResult = null
     ) {
         $columnNamesQuery = [];
         $client = $this->client;

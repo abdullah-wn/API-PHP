@@ -40,7 +40,7 @@ class Router
 	 * @param string The method (POST, PUT, ...)
 	 * @return void
 	 */
-	public function use($route, $callback = null, $map = '*')
+	public function useMethod($route, $callback = null, $map = '*')
 	{
 		// Handle a call with a router
 		if ($callback instanceof Router)
@@ -84,6 +84,12 @@ class Router
 
 			$this->map[$map][$route][] = $callback;
 		}
+	}
+	
+	public function __call ( $name , array $arguments ) {
+	    if ($name == 'use') {
+	        call_user_func_array(array($this, 'useMethod'), $arguments);
+	    }
 	}
 
 	/**

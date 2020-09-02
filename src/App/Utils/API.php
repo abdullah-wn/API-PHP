@@ -3,7 +3,6 @@
 namespace App\Utils;
 
 use Exception;
-use App\DAOInterface;
 use Express\Express;
 use Express\Router;
 use App\Utils\Entity\Entity;

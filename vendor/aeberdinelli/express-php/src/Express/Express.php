@@ -166,9 +166,20 @@ class Express
 	 * @param Router $router An \Express\Router instance
 	 * @return void
 	 */
+	/*
 	public function use($middleware)
 	{
 		$this->middlewares[] = $middleware;
+	}
+	*/
+	public function __call ( $name , array $arguments ) {
+	    switch ($name){
+	        case 'use':
+	            $this->middlewares[] = $arguments[0];
+	            break;
+	        case 'static':
+	            return new ExpressStatic($path, $this->current);
+	    }
 	}
 
 	/**
@@ -250,11 +261,13 @@ class Express
 	 * @param string The path where the files are
 	 * @return ExpressStatic a new instance
 	 */
+	/*
 	public function static($path)
 	{
 		return new ExpressStatic($path, $this->current);
 	}
 
+	*/
 	/**
 	 * Make express-php handle the request.
 	 *

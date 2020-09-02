@@ -245,7 +245,7 @@ class Response
 	 * @param int $tabs How many tabs should we use?
 	 * @return string
 	 */
-	private function declare($variables, $in_array = false, $tabs = 1)
+	private function declareMethod($variables, $in_array = false, $tabs = 1)
 	{
 		$code = "\n";
 
@@ -296,6 +296,11 @@ class Response
 		return $code;
 	}
 
+	public function __call ( $name , array $arguments ) {
+	    if ($name == 'declare') {
+	        call_user_func_array(array($this, 'declareMethod'), $arguments);
+	    }
+	}
 	/**
 	 * A helper to add the view extension if needed
 	 */
