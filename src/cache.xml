@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cache>
+  <field key="first_key" value="50"/>
+  <field key="second_key" value="10"/>
+  <field key="third_key" value="10"/>
+</cache>

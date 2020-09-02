@@ -5,7 +5,7 @@ namespace App\Utils;
 use App\Utils\Entity\Entity;
 use PDO;
 
-class DAO
+class DAO implements DAOInterface
 {
     const GET_BY_ID = 0;
 
@@ -398,7 +398,6 @@ class DAO
                                 $listEntity,
                                 $item
                             );
-                            unset($object[$property][$i]->{$ref});
                         } else {
                             $new = (array) $item;
                             $new[$ref] = $object;
@@ -407,8 +406,9 @@ class DAO
                                 $listEntity,
                                 $new
                             );
-                            unset($object[$property][$i]->{$ref});
                         }
+                        
+                        unset($object[$property][$i]->{$ref});
                         $i++;
                     }
                 }

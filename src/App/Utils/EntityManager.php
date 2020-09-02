@@ -7,6 +7,13 @@ use Exception;
 
 class EntityManager
 {
+    /**
+     * 
+     * @param string $pathEntity
+     * @param string $pathModel
+     * @param object $defaultConfig
+     * @return Entity[]
+     */
     public static function getEntities($pathEntity, $pathModel, $defaultConfig)
     {
         $defaultConfig->columns = self::object_to_array(
@@ -25,6 +32,11 @@ class EntityManager
         return EntityManager::formatEntities($entities, $defaultConfig);
     }
 
+    /**
+     * 
+     * @param object $obj
+     * @return array
+     */
     private static function object_to_array($obj)
     {
         //only process if it's an object or array being passed to the function
@@ -41,8 +53,14 @@ class EntityManager
             return $obj;
         }
     }
-
-    public static function formatEntities($entities, $defaultConfig)
+    
+    /**
+     * 
+     * @param array $entities
+     * @param \stdClass $defaultConfig
+     * @return Entity[]
+     */
+    public static function formatEntities(array $entities, $defaultConfig)
     {
         $fullEntities = [];
 
@@ -59,10 +77,10 @@ class EntityManager
 
     /**
      * Add all implicit fields to PartialEntity and return it as Entity
-     * @param entity
-     * @param defaultConfig
+     * @param \stdClass entity
+     * @param object defaultConfig
      */
-    public static function formatEntity($entity, $defaultConfig)
+    public static function formatEntity(\stdClass $entity, $defaultConfig)
     {
         $result = new Entity();
 
@@ -141,7 +159,13 @@ class EntityManager
         return $finalEntity;
     }
 
-    public static function getColumnsNotRefWithOnlyPropertyNames($entity)
+
+    /**
+     * 
+     * @param Entity $entity
+     * @return string[]
+     */
+    public static function getColumnsNotRefWithOnlyPropertyNames(Entity $entity)
     {
         $columns = [];
 
@@ -154,7 +178,12 @@ class EntityManager
         return $columns;
     }
 
-    public static function getColumnsNotRefWithProperties($entity)
+    /**
+     * 
+     * @param Entity $entity
+     * @return object[]
+     */
+    public static function getColumnsNotRefWithProperties(Entity $entity)
     {
         $columns = [];
 
@@ -167,7 +196,7 @@ class EntityManager
         return $columns;
     }
 
-    public static function getPropertyFromColumn($entity, $columnName)
+    public static function getPropertyFromColumn(Entity $entity, $columnName)
     {
         foreach ($entity->columns as $key => $column) {
             if (
@@ -184,7 +213,7 @@ class EntityManager
         return null;
     }
 
-    public static function getPropertyFromEntityName($entity, $entityName)
+    public static function getPropertyFromEntityName(Entity $entity, $entityName)
     {
         foreach ($entity->columns as $key => $column) {
             if ($column->entity === $entityName) {
@@ -195,7 +224,7 @@ class EntityManager
         return null;
     }
 
-    public static function getFullPropertyRefFromColumn($entity, $columnName)
+    public static function getFullPropertyRefFromColumn(Entity $entity, $columnName)
     {
         foreach ($entity->columns as $key => $column) {
             if (
@@ -212,7 +241,7 @@ class EntityManager
         return null;
     }
 
-    public static function getColumnsRefWithProperties($entity)
+    public static function getColumnsRefWithProperties(Entity $entity)
     {
         $columns = [];
 
@@ -225,7 +254,7 @@ class EntityManager
         return $columns;
     }
 
-    public static function getListsWithProperties($entity)
+    public static function getListsWithProperties(Entity $entity)
     {
         $columns = [];
 
@@ -238,7 +267,7 @@ class EntityManager
         return $columns;
     }
 
-    public static function getListProperties($entity)
+    public static function getListProperties(Entity $entity)
     {
         $columns = [];
 
@@ -251,7 +280,7 @@ class EntityManager
         return $columns;
     }
 
-    public static function getColumnsNotRefOnlyName($entity)
+    public static function getColumnsNotRefOnlyName(Entity $entity)
     {
         $columnsNames = [];
 
@@ -264,7 +293,7 @@ class EntityManager
         return $columnsNames;
     }
 
-    public static function getColumnsNotRef($entity)
+    public static function getColumnsNotRef(Entity $entity)
     {
         $columnsNotRef = [];
 
@@ -308,12 +337,12 @@ class EntityManager
      * @param lists
      */
     public static function handleColumns(
-        &$columns,
-        &$columnNames,
-        &$properties,
-        &$refs,
-        &$columnRefNames,
-        &$lists
+        array &$columns,
+        array &$columnNames,
+        array &$properties,
+        array &$refs,
+        array &$columnRefNames,
+        array &$lists
     ) {
         foreach ($columns as $key => $column) {
             if (!$column->list) {
@@ -336,11 +365,11 @@ class EntityManager
 
     /**
      * Merge columns from parent entities and the final entity
-     * @param entities
-     * @param entity
-     * @param columns
+     * @param Entity[] entities
+     * @param Entity entity
+     * @param array columns
      */
-    public static function handleInherits($entities, $entity, $columns)
+    public static function handleInherits(array $entities, Entity $entity, array $columns)
     {
         $result = array_merge($entity->columns, $columns);
         // new Map<string, Column>([...entity.columns, ...columns]);

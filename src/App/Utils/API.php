@@ -3,6 +3,11 @@
 namespace App\Utils;
 
 use Exception;
+use App\DAOInterface;
+use Express\Express;
+use Express\Router;
+use App\Utils\Entity\Entity;
+use Express\Response;
 
 class API
 {
@@ -16,7 +21,7 @@ class API
     private $config;
     private $dao;
 
-    public function __construct()
+    public function __construct(DAOInterface $dao = null)
     {
         $pathConfig = __DIR__ . "/../../../config.json";
         $this->config = json_decode(file_get_contents($pathConfig));
@@ -25,7 +30,10 @@ class API
             $this->config->parameters->path_model,
             $this->config->default
         );
-        $this->dao = new DAO();
+        
+        if(!$dao)
+            $dao = new DAO();
+        $this->dao = $dao;
     }
 
     public function getDao()
@@ -59,7 +67,7 @@ class API
                 }
             }
         } elseif (is_a($search, 'stdClass')) {
-            throw new Exception('Invalid type of search');
+            throw new Exception('Invalid type for search');
         }
 
         foreach ($entities as $entity) {
@@ -104,7 +112,7 @@ class API
         return null;
     }
 
-    public function createRoutes($app)
+    public function createRoutes(Router $app)
     {
         $app->get('/:entity/:id', function ($req, $res) {
             $entity = $this->getEntity($req->params->entity);
@@ -294,7 +302,7 @@ class API
         };
     }
 
-    static function executeActionsRequest($entity, $req, $res)
+    static function executeActionsRequest(Entity $entity, $req, Response $res)
     {
         if (
             $entity->eventListeners &&
@@ -310,7 +318,7 @@ class API
         }
     }
 
-    static function executeActionsResponse($entity, $res, $result)
+    static function executeActionsResponse(Entity $entity, Response $res, $result)
     {
         if (
             $entity->eventListeners &&
@@ -325,7 +333,7 @@ class API
         }
     }
 
-    static function getOnQueryActions($entity)
+    static function getOnQueryActions(Entity $entity)
     {
         $actions = null;
 
@@ -336,7 +344,7 @@ class API
         return $actions;
     }
 
-    static function getOnResultActions($entity)
+    static function getOnResultActions(Entity $entity)
     {
         $actions = null;
 

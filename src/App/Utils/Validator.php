@@ -2,9 +2,17 @@
 
 namespace App\Utils;
 
+use App\Utils\Entity\Entity;
+
 class Validator
 {
-    public static function validate($object, $entity)
+    /**
+     * 
+     * @param object $object
+     * @param Entity $entity
+     * @throws ValidationException
+     */
+    public static function validate($object, Entity $entity)
     {
         $columns = EntityManager::getColumnsNotRefWithProperties($entity);
         $errors = [];
