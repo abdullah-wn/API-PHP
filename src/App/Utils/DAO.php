@@ -104,8 +104,8 @@ class DAO implements DAOInterface
         $selectColumns = join(',', array_map($func, $columnNames));
 
         $sql = "SELECT {$selectColumns} 
-                        FROM `{$entity->table}`
-                        WHERE `{$entity->id}` = :id";
+                FROM `{$entity->table}`
+                WHERE `{$entity->id}` = :id";
 
         $sql = $this->handleOnQueryActions(
             self::GET_BY_ID,
@@ -115,10 +115,10 @@ class DAO implements DAOInterface
         );
 
         if (
-            self::$getByIdStatement->getEntityName() !== $entity ||
+            self::$getByIdStatement->getEntityName() !== $entity->name ||
             self::$getByIdStatement->getAction() !== self::GET_BY_ID
         ) {
-            self::$getByIdStatement->setEntityName($entity);
+            self::$getByIdStatement->setEntityName($entity->name);
             self::$getByIdStatement->setStatement($client->prepare($sql));
         }
 
@@ -151,11 +151,92 @@ class DAO implements DAOInterface
         return $object;
     }
 
+    public function getByJoin(
+        array $entities,
+        Entity $entity,
+        $join,
+        $reference,
+        $fromValue
+    ) {
+        $objects = [];
+        $columns = $entity->columns;
+        $columnNames = [];
+        $columnRefNames = [];
+        $properties = [];
+        $lists = [];
+        $refs = [];
+        $i = 0;
+        $client = $this->client;
+
+        if (property_exists($entity, 'inherits')) {
+            $parent = $entities[$entity->inherits];
+            if ($parent) {
+                $columns = EntityManager::handleInherits(
+                    $entities,
+                    $parent,
+                    $columns
+                );
+            }
+        }
+
+        EntityManager::handleColumns(
+            $columns,
+            $columnNames,
+            $properties,
+            $refs,
+            $columnRefNames,
+            $lists
+        );
+
+        $func = function ($column) use ($entity) {
+            return "`{$entity->table}`.`${column}`";
+        };
+
+        $displayColumns = join(',', array_map($func, $columnNames));
+
+        $sql = "SELECT {$displayColumns} 
+                FROM `{$entity->table}` 
+                INNER JOIN `{$join->table}` ON `{$join->table}`.`{$join->to}` = `{$entity->table}`.`{$reference->to}` 
+                WHERE `{$join->table}`.`{$join->from}` = ?";
+
+        $stmt = $client->prepare($sql);
+        $stmt->execute([$fromValue]);
+
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($result as $row) {
+            $objects[] = [];
+            /*
+             if ($full) {
+             $this->handleList(
+             $objects[count($objects) - 1],
+             $lists,
+             $row,
+             $entities
+             );
+             }
+             */
+            $this->fillObject(
+                $objects[$i],
+                $row,
+                $columnRefNames,
+                $columnNames,
+                $entities,
+                $refs,
+                $properties,
+                $columns
+            );
+            $i++;
+        }
+        return $objects;
+    }
+
     /**
      *
      * @param Entity[]  $entities
      * @param Entity   $entity
      * @param []         $fields
+     * @param bool $full
      * @param callable[]  $actionsOnQuery
      * @param callable[] $actionsOnResult
      */
@@ -163,6 +244,7 @@ class DAO implements DAOInterface
         array $entities,
         Entity $entity,
         array $fields,
+        $full = true,
         array $actionsOnQuery = null,
         array $actionsOnResult = null
     ) {
@@ -231,10 +313,10 @@ class DAO implements DAOInterface
         );
 
         if (
-            self::$getByFieldsStatement->getEntityName() !== $entity ||
+            self::$getByFieldsStatement->getEntityName() !== $entity->name ||
             self::$getByFieldsStatement->getAction() !== self::GET_BY_FIELDS
         ) {
-            self::$getByFieldsStatement->setEntityName($entity);
+            self::$getByFieldsStatement->setEntityName($entity->name);
             self::$getByFieldsStatement->setStatement($client->prepare($sql));
         }
 
@@ -243,23 +325,23 @@ class DAO implements DAOInterface
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $objs = $this->handleOnResultActions(
+        $objects = $this->handleOnResultActions(
             self::GET_BY_FIELDS,
             $actionsOnResult,
             $result,
             $objects
         );
 
-        $objects = $objs;
-
         foreach ($result as $row) {
             $objects[] = [];
-            $this->handleList(
-                $objects[count($objects) - 1],
-                $lists,
-                $row,
-                $entities
-            );
+            if ($full) {
+                $this->handleList(
+                    $objects[count($objects) - 1],
+                    $lists,
+                    $row,
+                    $entities
+                );
+            }
             $this->fillObject(
                 $objects[count($objects) - 1],
                 $row,
@@ -268,7 +350,8 @@ class DAO implements DAOInterface
                 $entities,
                 $refs,
                 $properties,
-                $columns
+                $columns,
+                $full
             );
         }
 
@@ -407,7 +490,7 @@ class DAO implements DAOInterface
                                 $new
                             );
                         }
-                        
+
                         unset($object[$property][$i]->{$ref});
                         $i++;
                     }
@@ -463,10 +546,10 @@ class DAO implements DAOInterface
         );
 
         if (
-            self::$updateStatement->getEntityName() !== $entity ||
+            self::$updateStatement->getEntityName() !== $entity->name ||
             self::$updateStatement->getAction() !== self::UPDATE
         ) {
-            self::$updateStatement->setEntityName($entity);
+            self::$updateStatement->setEntityName($entity->name);
             self::$updateStatement->setStatement($client->prepare($sql));
         }
 
@@ -491,7 +574,7 @@ class DAO implements DAOInterface
      *
      * @param Entity[] $entities
      * @param Entity $entity
-     * @param \stdClass $object
+     * @param \stdClass|array $object
      * @param callable[] $actionsOnQuery
      * @param callable[] $actionsOnResult
      */
@@ -590,10 +673,10 @@ class DAO implements DAOInterface
         );
 
         if (
-            self::$createStatement->getEntityName() !== $entity ||
+            self::$createStatement->getEntityName() !== $entity->name ||
             self::$createStatement->getAction() !== self::CREATE
         ) {
-            self::$createStatement->setEntityName($entity);
+            self::$createStatement->setEntityName($entity->name);
             self::$createStatement->setStatement($client->prepare($sql));
         }
 
@@ -683,10 +766,10 @@ class DAO implements DAOInterface
         }
 
         if (
-            self::$deleteStatement->getEntityName() !== $entity ||
+            self::$deleteStatement->getEntityName() !== $entity->name ||
             self::$deleteStatement->getAction() !== self::DELETE
         ) {
-            self::$deleteStatement->setEntityName($entity);
+            self::$deleteStatement->setEntityName($entity->name);
             self::$deleteStatement->setStatement($client->prepare($sql));
         }
 
@@ -752,11 +835,11 @@ class DAO implements DAOInterface
         }
 
         if (
-            self::$deleteByFieldsStatement->getEntityName() !== $entity ||
+            self::$deleteByFieldsStatement->getEntityName() !== $entity->name ||
             self::$deleteByFieldsStatement->getAction() !==
                 self::DELETE_BY_FIELDS
         ) {
-            self::$deleteByFieldsStatement->setEntityName($entity);
+            self::$deleteByFieldsStatement->setEntityName($entity->name);
             self::$deleteByFieldsStatement->setStatement(
                 $client->prepare($sql)
             );
@@ -835,10 +918,10 @@ class DAO implements DAOInterface
         );
 
         if (
-            self::$getAllStatement->getEntityName() !== $entity ||
+            self::$getAllStatement->getEntityName() !== $entity->name ||
             self::$getAllStatement->getAction() !== self::GET_ALL
         ) {
-            self::$getAllStatement->setEntityName($entity);
+            self::$getAllStatement->setEntityName($entity->name);
             self::$getAllStatement->setStatement($client->prepare($sql));
         }
 
@@ -857,7 +940,7 @@ class DAO implements DAOInterface
         ) {
             $object = [];
 
-            $this->handleList($object, $lists, $row, $entities);
+            // $this->handleList($object, $lists, $row, $entities);
 
             $this->fillObject(
                 $object,
@@ -867,7 +950,8 @@ class DAO implements DAOInterface
                 $entities,
                 $refs,
                 $properties,
-                $columns
+                $columns,
+                false
             );
 
             return $object;
@@ -910,9 +994,10 @@ class DAO implements DAOInterface
         $entities,
         $refs,
         $properties,
-        $columns
+        $columns,
+        $full = true
     ) {
-        if (count($refs) > 0) {
+        if (count($refs) > 0 && $full) {
             $refValues = array_map(function ($columnName) use ($row) {
                 return $row[$columnName];
             }, $columnRefNames);
@@ -921,7 +1006,7 @@ class DAO implements DAOInterface
 
         for ($i = 0; $i < count($columnNames); $i++) {
             if (in_array($columnNames[$i], $columnRefNames)) {
-                if ($objectsRefs) {
+                if (isset($objectsRefs)) {
                     $object[$properties[$i]] = $objectsRefs[$properties[$i]];
                 }
             } else {
@@ -937,24 +1022,12 @@ class DAO implements DAOInterface
         }
     }
 
-    public static function buildQueryForRef($entity, $columnRef)
-    {
-        $columnsNames = EntityManager::getColumnsNotRefOnlyName($entity);
-
-        $func = function ($columnName) use ($entity) {
-            return "`{$entity->table}`.`{$columnName}`";
-        };
-
-        $selectFields = join(',', array_map($func, $columnsNames));
-        return "SELECT {$selectFields} FROM `{$entity->table}` WHERE `${columnRef}` = ?";
-    }
-
     /**
      *
      * @param Entity[] $entities
      * @param [] $refs
      * @param [] $refValues
-     * @return \stdClass
+     * @return []
      */
     public function retrieveRefs($entities, $refs, $refValues)
     {
@@ -965,56 +1038,17 @@ class DAO implements DAOInterface
         foreach ($refs as $keyRef => $ref) {
             $entity = $entities[$ref->entity];
             if ($entity) {
-                $columns = EntityManager::getColumnsNotRefWithOnlyPropertyNames(
-                    $entity
+                $property = EntityManager::getPropertyFromColumn(
+                    $entity,
+                    $ref->reference->to
                 );
-
-                $query = self::buildQueryForRef($entity, $ref->reference->to);
-                $stmt = $client->prepare($query);
-
-                $stmt->execute([$refValues[$i]]);
-
-                if ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $object = [];
-                    foreach ($columns as $key => $columnName) {
-                        $value = $res[$columnName];
-                        $column = $entity->columns[$key];
-                        if ($column) {
-                            $object[$key] =
-                                $column->entity === 'JSON'
-                                    ? json_encode($value)
-                                    : $value;
-                        }
-                    }
-
-                    if ($ref->full) {
-                        $refsColumns = EntityManager::getColumnsRefWithProperties(
-                            $entity
-                        );
-                        $refValues2 = [];
-                        foreach ($refsColumns as $column) {
-                            $property = EntityManager::getPropertyFromColumn(
-                                $entity,
-                                $column->reference->from
-                            );
-                            if ($property) {
-                                $refValues2[] = $object[$property];
-                            }
-                        }
-
-                        foreach (
-                            $this->retrieveRefs(
-                                $entities,
-                                $refsColumns,
-                                $refValues2
-                            )
-                            as $field => $value
-                        ) {
-                            $object[$field] = $value;
-                        }
-                    }
-                    $object['_type'] = $ref->entity;
-                }
+                $object = $this->getByFields(
+                    $entities,
+                    $entity,
+                    [$property => $refValues[$i]],
+                    false
+                );
+                $object['_type'] = $ref->entity;
                 $objects[$keyRef] = $object;
             }
             $i++;
@@ -1072,13 +1106,25 @@ class DAO implements DAOInterface
                         $propertyRef->column->reference->from;
                     $propertyRef->column->reference = null;
                     $propertyRef->column->entity = null;
+                    $propertyRef->column->list = false;
 
                     $entity->columns[$propertyRef->property] =
                         $propertyRef->column;
 
-                    $object = $this->getByFields($entities, $entity, [
-                        $propertyRef->property => $listValues[$i],
-                    ]);
+                    if ($list->join) {
+                        $object = $this->getByJoin(
+                            $entities,
+                            $entity,
+                            $list->join,
+                            $list->reference,
+                            $listValues[$i]
+                        );
+                    } else {
+                        $object = $this->getByFields($entities, $entity, [
+                            $propertyRef->property => $listValues[$i],
+                        ]);
+                    }
+
                     if ($object) {
                         for ($j = 0; $j < count($object); $j++) {
                             $object[$j]['_type'] = $entityName;
