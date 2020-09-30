@@ -8,7 +8,7 @@ use Exception;
 class EntityManager
 {
     /**
-     * 
+     *
      * @param string $pathEntity
      * @param string $pathModel
      * @param object $defaultConfig
@@ -33,7 +33,7 @@ class EntityManager
     }
 
     /**
-     * 
+     *
      * @param object $obj
      * @return array
      */
@@ -53,9 +53,9 @@ class EntityManager
             return $obj;
         }
     }
-    
+
     /**
-     * 
+     *
      * @param array $entities
      * @param \stdClass $defaultConfig
      * @return Entity[]
@@ -159,9 +159,8 @@ class EntityManager
         return $finalEntity;
     }
 
-
     /**
-     * 
+     *
      * @param Entity $entity
      * @return string[]
      */
@@ -179,7 +178,7 @@ class EntityManager
     }
 
     /**
-     * 
+     *
      * @param Entity $entity
      * @return object[]
      */
@@ -213,8 +212,10 @@ class EntityManager
         return null;
     }
 
-    public static function getPropertyFromEntityName(Entity $entity, $entityName)
-    {
+    public static function getPropertyFromEntityName(
+        Entity $entity,
+        $entityName
+    ) {
         foreach ($entity->columns as $key => $column) {
             if ($column->entity === $entityName) {
                 return $key;
@@ -224,8 +225,10 @@ class EntityManager
         return null;
     }
 
-    public static function getFullPropertyRefFromColumn(Entity $entity, $columnName)
-    {
+    public static function getFullPropertyRefFromColumn(
+        Entity $entity,
+        $columnName
+    ) {
         foreach ($entity->columns as $key => $column) {
             if (
                 $column->reference &&
@@ -307,34 +310,35 @@ class EntityManager
     }
 
     /*
-        static function browse(parent, groups, parents) {
-            $finalEntities = [];
-            for ($i = 0; i < parent.children.length; i++) {
-                if (typeof parent.children[i] === "object" && parent.children[i].hasOwnProperty("parent")) {
-                    parents.push(parent.entity);
-                    EntityManager.browse(parent.children[i].parent, groups, parents);
-                } else {
-                    finalEntities.push(parent.children[i]);
-                }
-            }
-
-            if (finalEntities.length > 0) {
-                groups.push({
-                    finalEntities,
-                    parents: parents.map((parent) => parent)
-                });
-            }
-        }
-    */
+     static function browse(parent, groups, parents) {
+     $finalEntities = [];
+     for ($i = 0; i < parent.children.length; i++) {
+     if (typeof parent.children[i] === "object" && parent.children[i].hasOwnProperty("parent")) {
+     parents.push(parent.entity);
+     EntityManager.browse(parent.children[i].parent, groups, parents);
+     } else {
+     finalEntities.push(parent.children[i]);
+     }
+     }
+     if (finalEntities.length > 0) {
+     groups.push({
+     finalEntities,
+     parents: parents.map((parent) => parent)
+     });
+     }
+     }
+     */
 
     /**
      * Extract columnNames, properties, columnRefNames and lists from Entity's columns
-     * @param columns
-     * @param columnNames
-     * @param properties
-     * @param refs
-     * @param columnRefNames
-     * @param lists
+     *
+     * @param array $columns
+     * @param array $columnNames
+     * @param array $properties
+     * @param array $refs
+     * @param array $columnRefNames
+     * @param array $lists
+     * @return void
      */
     public static function handleColumns(
         array &$columns,
@@ -359,6 +363,8 @@ class EntityManager
                 }
             } else {
                 $lists[$key] = $column;
+                $columnNames[] = $column->reference->from;
+                $columnNames = array_unique($columnNames);
             }
         }
     }
@@ -369,8 +375,11 @@ class EntityManager
      * @param Entity entity
      * @param array columns
      */
-    public static function handleInherits(array $entities, Entity $entity, array $columns)
-    {
+    public static function handleInherits(
+        array $entities,
+        Entity $entity,
+        array $columns
+    ) {
         $result = array_merge($entity->columns, $columns);
         // new Map<string, Column>([...entity.columns, ...columns]);
 
